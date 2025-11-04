@@ -1,0 +1,13 @@
+pandas>=2.1
+numpy>=1.26
+yfinance>=0.2.52
+duckdb>=1.0.0
+PySide6>=6.6
+matplotlib>=3.8
+mplfinance>=0.12.10b0
+PyYAML>=6.0
+requests>=2.32
+beautifulsoup4>=4.12
+lxml>=5.2
+cloudscraper>=1.2.71
+ta-lib>=0.4.28

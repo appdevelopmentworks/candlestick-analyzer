@@ -1,0 +1,38 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+
+# Build outputs
+build/
+dist/
+*.spec
+*.egg-info/
+interact/
+
+# Testing / coverage
+.pytest_cache/
+coverage/
+htmlcov/
+
+# Logs
+logs/
+*.log
+
+# Data caches
+data/ohlcv.duckdb
+
+# IDE / tooling
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Misc
+*.bak
+.DS_Store

@@ -1,0 +1,8 @@
+﻿Function,English,Japanese,Variant,典型セットアップ,次の動き（傾向）,スコア（-5～+5)
+CDL2CROWS,Two Crows,二羽烏,bearish,,弱気への反転示唆,-2
+CDL3BLACKCROWS,Three Black Crows,三羽烏,bearish,,下落継続になりやすい,-4
+CDLENGULFING,Engulfing Pattern,包み足,bullish,,反転しやすい,3
+CDLENGULFING,Engulfing Pattern,包み足,bearish,,反転しやすい,-3
+CDLKICKINGBYLENGTH,Kicking – bull/bear by longer marubozu,キッキング（長い丸坊主）,bullish,,非常に強い反転,5
+CDLKICKINGBYLENGTH,Kicking – bull/bear by longer marubozu,キッキング（長い丸坊主）,bearish,,非常に強い反転,-5
+CDLDOJI,Doji,十字線,neutral,,迷い,0

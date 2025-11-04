@@ -1,0 +1,45 @@
+support_links:
+  docs: "https://internal.example.com/docs/candlestick-analyzer"
+  csv_guide: "https://internal.example.com/docs/candlestick-analyzer/csv-format"
+  index_help: "https://internal.example.com/docs/candlestick-analyzer/index-fetch"
+  yf_help: "https://pypi.org/project/yfinance/"
+  talib_setup: "https://ta-lib.org/"
+
+app:
+  timezone: Asia/Tokyo
+  theme: light
+  fonts: ["Yu Gothic UI", "Meiryo", "Segoe UI"]
+  error_support:
+    E-CSV-NOTFOUND: csv_guide
+    E-CSV-ENCODING: csv_guide
+    E-CSV-EMPTY: csv_guide
+    E-CSV-UNKNOWN: docs
+    E-INDEX-NOTFOUND: index_help
+    E-INDEX-FETCH: index_help
+    E-INDEX-EMPTY: index_help
+    E-META-UNEXPECTED: docs
+    E-YF-404: yf_help
+    E-TA-LIB: talib_setup
+    E-ANL-UNEXPECTED: docs
+    E-UNEXPECTED: docs
+
+fetch:
+  period_days: 400
+  parallel_max: 8
+  retry:
+    max_attempts: 2
+    backoff: 1.6
+
+scoring:
+  highlight_threshold_pos: 4
+  highlight_threshold_neg: -4
+  clip_min: -5
+  clip_max: 5
+
+cache:
+  duckdb_path: data/ohlcv.duckdb
+
+logging:
+  level: INFO
+  path: logs/app.log
+  rotate_keep: 7
