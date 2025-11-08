@@ -18,6 +18,7 @@
 3. TA-Lib ネイティブライブラリをインストールします（次節参照）。
 
 4. `python -m pytest` でユニットテストを実行し、すべて成功することを確認します。
+5. アプリ用アイコン `Appimg.ico`（48〜256pxの複数サイズを含む ICO 推奨）をリポジトリ直下に配置し、ビルドで参照できるようにしておきます。
 
 ## 2. TA-Lib ネイティブライブラリ
 
@@ -77,6 +78,8 @@ python -m nuitka \
   --include-data-dir=samples=samples \
   --include-data-file=config.yaml=config.yaml \
   --include-data-file=schema.sql=schema.sql \
+  --include-data-file=Appimg.ico=Appimg.ico \
+  --windows-icon-from-ico=Appimg.ico \
   --windows-company-name="YourCompany" \
   --windows-product-name="Candlestick Analyzer" \
   --windows-file-version=1.0.0 \
@@ -110,13 +113,18 @@ python -m nuitka \
 
 ```bash
 pip install pyinstaller
+set PYINSTALLER_NO_BUILD_TIMESTAMP=1  # Windowsでタイムスタンプ更新エラーが出る場合
 pyinstaller \
   --onefile \
   --name candlestick-analyzer \
+  --icon Appimg.ico \
+  --paths src \
+  --exclude-module PyQt5 \
   --add-data "resources;resources" \
   --add-data "samples;samples" \
   --add-data "config.yaml;." \
   --add-data "schema.sql;." \
+  --add-data "Appimg.ico;." \
   src/app.py
 ```
 

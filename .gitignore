@@ -14,6 +14,8 @@ dist/
 *.spec
 *.egg-info/
 interact/
+*.exe
+*.dll
 
 # Testing / coverage
 .pytest_cache/

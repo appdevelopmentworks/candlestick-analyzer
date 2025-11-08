@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Sequence
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QBrush, QColor
+from PySide6.QtGui import QAction, QBrush, QColor, QIcon
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -30,6 +30,8 @@ from ui.dialogs.settings import SettingsDialog
 from ui.viewmodels.main import MainViewModel
 from ui.workers.analyzer_worker import AnalyzerWorker
 from export.exporter import export_table
+
+ICON_PATH = Path(__file__).resolve().parents[2] / "Appimg.ico"
 
 
 def _make_item(value: str) -> QTableWidgetItem:
@@ -70,6 +72,11 @@ def run_app(watchlist: Path | None = None) -> int:
     app = QApplication([])
     window = QMainWindow()
     window.setWindowTitle("TA‑Lib ローソク足アナライザー")
+
+    if ICON_PATH.exists():
+        app_icon = QIcon(str(ICON_PATH))
+        app.setWindowIcon(app_icon)
+        window.setWindowIcon(app_icon)
 
     table = QTableWidget(0, 7)
     table.setHorizontalHeaderLabels(["Symbol", "Name", "Market", "Industry", "Score", "Hits", "Last Date"])
