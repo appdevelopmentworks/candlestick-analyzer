@@ -25,7 +25,7 @@ app:
 
 fetch:
   period_days: 400
-  parallel_max: 8
+  parallel_max: 5
   retry:
     max_attempts: 2
     backoff: 1.6

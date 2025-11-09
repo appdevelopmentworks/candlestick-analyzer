@@ -112,7 +112,9 @@ class StatusPanel(QWidget):
             if not self._cancelling:
                 self._progress.setRange(0, state.total)
                 self._progress.setValue(min(state.completed, state.total))
-                self._progress.setFormat(f"解析中 {state.completed}/{state.total}")
+                # パーセント表示を追加
+                percent = int((state.completed / state.total) * 100) if state.total > 0 else 0
+                self._progress.setFormat(f"解析中 {state.completed}/{state.total} ({percent}%)")
             self._progress.setVisible(True)
         else:
             self._progress.setVisible(False)

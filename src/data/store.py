@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 class PricesRepo:
     db_path: Path
     _schema_lock: ClassVar[Lock] = Lock()
+    _db_lock: ClassVar[Lock] = Lock()  # 全DB操作の直列化用（DuckDBの制限回避）
     _prices_initialized: bool = field(default=False, init=False, repr=False)
 
     @classmethod
@@ -40,6 +41,8 @@ class PricesRepo:
     def _conn(self) -> duckdb.DuckDBPyConnection:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         try:
+            # read_onlyを使わず、常にread-writeモードで接続
+            # 書き込みはロックで保護する
             return duckdb.connect(str(self.db_path))
         except Exception:
             logger.exception("Failed to connect to DuckDB: %s", self.db_path)
@@ -61,51 +64,53 @@ class PricesRepo:
             logger.debug("Skip upsert: empty dataframe for %s", symbol)
             return
         prepared = self._prepare_dataframe(df, symbol, tz)
-        con = self._conn()
-        try:
-            self._ensure_prices_table(con)
-            records = tuple(self._iter_price_rows(prepared))
-            if not records:
-                return
-            con.executemany(
-                "INSERT OR REPLACE INTO prices VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                records,
-            )
-        except Exception:
-            logger.exception("Failed to upsert prices for %s", symbol)
-            raise
-        finally:
-            con.close()
+        records = tuple(self._iter_price_rows(prepared))
+        if not records:
+            return
+        # 全DB操作をロックで直列化（DuckDBの制限回避）
+        with self._db_lock:
+            con = self._conn()
+            try:
+                self._ensure_prices_table(con)
+                con.executemany(
+                    "INSERT OR REPLACE INTO prices VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    records,
+                )
+            except Exception:
+                logger.exception("Failed to upsert prices for %s", symbol)
+                raise
+            finally:
+                con.close()
 
     def get_range(self, symbol: str) -> pd.DataFrame:
-        con = self._conn()
-        try:
-            self._ensure_prices_table(con)
-            df = con.execute(
-                "SELECT date, open, high, low, close, volume FROM prices "
-                "WHERE symbol=? ORDER BY date",
-                [symbol],
-            ).df()
-        except Exception:
-            logger.exception("Failed to fetch prices for %s", symbol)
-            raise
-        finally:
-            con.close()
+        with self._db_lock:
+            con = self._conn()
+            try:
+                df = con.execute(
+                    "SELECT date, open, high, low, close, volume FROM prices "
+                    "WHERE symbol=? ORDER BY date",
+                    [symbol],
+                ).df()
+            except Exception:
+                logger.exception("Failed to fetch prices for %s", symbol)
+                raise
+            finally:
+                con.close()
         return df
 
     def get_latest_date(self, symbol: str) -> Optional[str]:
-        con = self._conn()
-        try:
-            self._ensure_prices_table(con)
-            row = con.execute(
-                "SELECT max(date) FROM prices WHERE symbol=?",
-                [symbol],
-            ).fetchone()
-        except Exception:
-            logger.exception("Failed to fetch latest date for %s", symbol)
-            raise
-        finally:
-            con.close()
+        with self._db_lock:
+            con = self._conn()
+            try:
+                row = con.execute(
+                    "SELECT max(date) FROM prices WHERE symbol=?",
+                    [symbol],
+                ).fetchone()
+            except Exception:
+                logger.exception("Failed to fetch latest date for %s", symbol)
+                raise
+            finally:
+                con.close()
         return row[0] if row else None
 
     # ------------------------------------------------------------------

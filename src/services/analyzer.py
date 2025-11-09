@@ -274,6 +274,11 @@ class AnalyzerService:
             logger.info("yfinance returned no data for %s", symbol)
             raise app_error("E-YF-404", symbol=symbol)
         df = df.reset_index()  # Date列を明示化
+        # MultiIndexカラムをフラット化
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        # カラムをrenameで確実に文字列化
+        df = df.rename(columns={col: str(col) for col in df.columns})
         df = self._sanitize_ohlc(df)
         return df
 
@@ -310,6 +315,8 @@ class AnalyzerService:
         except AppError as err:
             raise err
         except Exception as exc:
+            import traceback
+            logger.error(f"Full traceback for {record.symbol}:\n{traceback.format_exc()}")
             raise ensure_app_error(
                 exc,
                 code="E-ANL-UNEXPECTED",
@@ -336,10 +343,10 @@ class AnalyzerService:
         min_positive = ohlc[ohlc > 0].min().min()
         if pd.isna(min_positive) or min_positive <= 0:
             return df
+        # 各カラムに対してnumpyで直接置換（pandasの曖昧性を回避）
         for col in present:
-            mask = df[col] <= 0
-            if mask.any():
-                df.loc[mask, col] = min_positive
+            # numpyのwhere を使用して置換
+            df[col] = df[col].where(df[col] > 0, min_positive)
         return df
 
     @staticmethod
